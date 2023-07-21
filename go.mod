@@ -1,6 +1,6 @@
 module github.com/DmitryKolbin/go-global
 
-go 1.19
+go 1.18
 
 require (
 	github.com/dimchansky/utfbom v1.1.1 // indirect
