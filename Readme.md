@@ -1,6 +1,6 @@
 # Go library for Go Global Travel
 
-documentation: https://data.goglobal.travel/specs/XmlSpecs_v3.14.3.html
+documentation: https://data.goglobal.travel/specs/XmlSpecs_v3.15.html
 
 Example of usage:
 ```
@@ -12,7 +12,6 @@ service := client.NewGoGlobalService(
 	)
 
 	response, err := service.Search(models.HotelSearchRequest{
-		Version:        "2.3",
 		ResponseFormat: client.ResponseFormatJson,
 		IncludeGeo:     true,
 		Currency:       "EUR",

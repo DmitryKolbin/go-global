@@ -173,13 +173,8 @@ type BookingInsertResponse struct {
 type Commission struct {
 	XMLName xml.Name `xml:"Commission"`
 	//Attribute - The Comm % value - with IncludeCommission
-	Pct float64 `xml:"pct,attr"`
-}
-
-type BookInsertRate struct {
-	XMLName  xml.Name `xml:"Rates"`
-	Currency string   `xml:"Currency,attr"`
-	Value    float64  `xml:",chardata"`
+	Pct   float64 `xml:"pct,attr"`
+	Value float64 `xml:"_,chardata"`
 }
 
 type RoomsResponse struct {
