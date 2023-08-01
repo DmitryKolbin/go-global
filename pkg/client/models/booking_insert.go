@@ -20,7 +20,7 @@ type BookingInsertRequest struct {
 	//Check-in Date (yyyy-MM-dd)
 	ArrivalDate string `xml:"ArrivalDate"`
 	//Number of nights
-	Nights string `xml:"Nights"`
+	Nights int64 `xml:"Nights"`
 	//Indicates whether client wants to be advised on alternates if his room is unavailable for booking (1=no alternatives)
 	NoAlternativeHotel int64 `xml:"NoAlternativeHotel"`
 	//The lead pax of the booking
@@ -58,9 +58,9 @@ type RoomTypeRequest struct {
 type RoomRequest struct {
 	XMLName xml.Name `xml:"Room"`
 	//Attribute - A unique room ID for each type - incremental
-	RoomId     int64      `xml:"RoomId,attr"`
-	PersonName PersonName `xml:"PersonName"`
-	ExtraBed   ExtraBed   `xml:"ExtraBed"`
+	RoomId     int64        `xml:"RoomId,attr"`
+	PersonName []PersonName `xml:"PersonName"`
+	ExtraBed   []ExtraBed   `xml:"ExtraBed"`
 }
 
 type PersonName struct {
@@ -84,7 +84,7 @@ type ExtraBed struct {
 	//Attribute - Child Last Name - Version 2+ only
 	LastName string `xml:"LastName,attr"`
 	//Attribute - The age of the child. Version 2.2 and above, supporting child age 1 - 18. Before 2.2, ages 2 - 10.
-	ChildAge string `xml:"ChildAge,attr"`
+	ChildAge int64 `xml:"ChildAge,attr"`
 }
 
 type Preferences struct {
@@ -153,7 +153,7 @@ type BookingInsertResponse struct {
 	//CXL deadline date
 	CancellationDeadline string `xml:"CancellationDeadline"`
 	//Number of nights
-	Nights string `xml:"Nights"`
+	Nights int64 `xml:"Nights"`
 	//Don't return alternative
 	NoAlternativeHotel string `xml:"NoAlternativeHotel"`
 	//The LeadPax of the booking
@@ -202,9 +202,9 @@ type RoomResponse struct {
 	//Attribute - A unique room ID for each type - incremental
 	RoomId int64 `xml:"RoomId,attr"`
 	//Attribute - booked room description
-	Category   string     `xml:"Category,attr"`
-	PersonName PersonName `xml:"PersonName"`
-	ExtraBed   ExtraBed   `xml:"ExtraBed"`
+	Category   string       `xml:"Category,attr"`
+	PersonName []PersonName `xml:"PersonName"`
+	ExtraBed   []ExtraBed   `xml:"ExtraBed"`
 }
 
 type PaymentTransactions struct {

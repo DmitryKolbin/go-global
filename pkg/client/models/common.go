@@ -106,6 +106,9 @@ const (
 	AmendmentCategoryMiniSuite   = "MINI SUITE"
 	AmendmentCategoryStudio      = "STUDIO"
 	AmendmentCategoryExecutive   = "EXECUTIVE"
+
+	CancellationPolicyModePercent = "PCT"
+	CancellationPolicyModeFix     = "FLAT"
 )
 
 type ResponseRoot[T any] interface {
@@ -202,7 +205,7 @@ type GoGlobalError struct {
 type GoGlobalDebugError struct {
 	XMLName     xml.Name `xml:"DebugError" json:"-"`
 	Incident    int64    `xml:"incident,attr" json:"Incident"`
-	TimeStamp   string   `xml:"timestamp,attr"json:"TimeStamp"`
+	TimeStamp   string   `xml:"timestamp,attr" json:"TimeStamp"`
 	Message     string   `xml:",cdata" json:"Message"`
 	FinalAction string   `json:"finalAction"`
 }

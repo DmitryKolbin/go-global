@@ -21,21 +21,23 @@ const (
 	getDestinationsUrl = "https://static-data.tourismcloudservice.com/propsdata/Destinations/compress/true"
 	getHotelsUrlFmt    = "https://static-data.tourismcloudservice.com/agency/hotels/%s"
 
-	searchRequest           = "HOTEL_SEARCH_REQUEST"
-	bookingValidation       = "BOOKING_VALUATION_REQUEST"
-	bookingInsert           = "BOOKING_INSERT_REQUEST"
-	bookingStatus           = "BOOKING_STATUS_REQUEST"
-	bookingSearch           = "BOOKING_SEARCH_REQUEST"
-	advBookingSearch        = "ADV_BOOKING_SEARCH_REQUEST"
-	bookingCancel           = "BOOKING_CANCEL_REQUEST"
-	voucherDetails          = "VOUCHER_DETAILS_REQUEST"
-	bookingInfoForAmendment = "BOOKING_INFO_FOR_AMENDMENT_REQUEST"
-	bookingAmendment        = "BOOKING_AMENDMENT_REQUEST"
-	hotelInfo               = "HOTEL_INFO_REQUEST"
-	priceBreakdown          = "PRICE_BREAKDOWN_REQ"
+	searchRequest           = goGlobalRequest("HOTEL_SEARCH_REQUEST")
+	bookingValidation       = goGlobalRequest("BOOKING_VALUATION_REQUEST")
+	bookingInsert           = goGlobalRequest("BOOKING_INSERT_REQUEST")
+	bookingStatus           = goGlobalRequest("BOOKING_STATUS_REQUEST")
+	bookingSearch           = goGlobalRequest("BOOKING_SEARCH_REQUEST")
+	advBookingSearch        = goGlobalRequest("ADV_BOOKING_SEARCH_REQUEST")
+	bookingCancel           = goGlobalRequest("BOOKING_CANCEL_REQUEST")
+	voucherDetails          = goGlobalRequest("VOUCHER_DETAILS_REQUEST")
+	bookingInfoForAmendment = goGlobalRequest("BOOKING_INFO_FOR_AMENDMENT_REQUEST")
+	bookingAmendment        = goGlobalRequest("BOOKING_AMENDMENT_REQUEST")
+	hotelInfo               = goGlobalRequest("HOTEL_INFO_REQUEST")
+	priceBreakdown          = goGlobalRequest("PRICE_BREAKDOWN_REQUEST")
 )
 
-var requestTypes = map[string]int64{
+type goGlobalRequest string
+
+var requestTypes = map[goGlobalRequest]int64{
 	searchRequest:           11,
 	bookingValidation:       9,
 	bookingInsert:           2,
@@ -46,8 +48,18 @@ var requestTypes = map[string]int64{
 	voucherDetails:          8,
 	bookingInfoForAmendment: 15,
 	bookingAmendment:        16,
-	hotelInfo:               6,
+	hotelInfo:               61,
 	priceBreakdown:          14,
+}
+var defaultRequestVersion = map[goGlobalRequest]string{
+	searchRequest:     "2.4",
+	bookingValidation: "2.0",
+	bookingInsert:     "2.3",
+	bookingSearch:     "2.2",
+	advBookingSearch:  "2.2",
+	voucherDetails:    "2.3",
+	hotelInfo:         "2.2",
+	priceBreakdown:    "2.0",
 }
 
 type GoGlobalService interface {
@@ -70,26 +82,26 @@ type GoGlobalService interface {
 type RequestLogger func(r *http.Request) error
 type ResponseLogger func(r *http.Response) error
 
+type Credentials struct {
+	AgencyId string
+	UserName string
+	Password string
+}
+
 type goGlobalService struct {
-	baseUrl  string
-	agencyId string
-	userName string
-	password string
-	client   *http.Client
+	baseUrl         string
+	baseCredentials Credentials
+	client          *http.Client
 }
 
 func NewGoGlobalService(
 	apiUrl string,
-	agencyId string,
-	userName string,
-	password string,
+	baseCredentials Credentials,
 ) GoGlobalService {
 	return &goGlobalService{
-		baseUrl:  apiUrl,
-		agencyId: agencyId,
-		userName: userName,
-		password: password,
-		client:   &http.Client{},
+		baseUrl:         apiUrl,
+		baseCredentials: baseCredentials,
+		client:          &http.Client{},
 	}
 }
 
@@ -98,7 +110,7 @@ func (c *goGlobalService) GetDestinations() ([]*Destination, error) {
 	if err != nil {
 		return nil, err
 	}
-	req.SetBasicAuth(c.userName, c.password)
+	req.SetBasicAuth(c.baseCredentials.UserName, c.baseCredentials.Password)
 
 	resp, err := c.client.Do(req)
 	if err != nil {
@@ -125,12 +137,12 @@ func (c *goGlobalService) GetDestinations() ([]*Destination, error) {
 }
 
 func (c *goGlobalService) GetHotels() ([]*Hotel, error) {
-	url := fmt.Sprintf(getHotelsUrlFmt, c.agencyId)
+	url := fmt.Sprintf(getHotelsUrlFmt, c.baseCredentials.AgencyId)
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}
-	req.SetBasicAuth(c.userName, c.password)
+	req.SetBasicAuth(c.baseCredentials.UserName, c.baseCredentials.Password)
 
 	resp, err := c.client.Do(req)
 	if err != nil {
@@ -159,6 +171,9 @@ func (c *goGlobalService) Search(
 	requestLogger RequestLogger,
 	responseLogger ResponseLogger,
 ) ([]models.HotelSearchResponseItem, error) {
+	if request.Version == "" {
+		request.Version = defaultRequestVersion[searchRequest]
+	}
 	results := models.HotelSearchResponse{}
 	response, err := c.doRequest(searchRequest, request, requestLogger, responseLogger)
 	if err != nil {
@@ -182,6 +197,9 @@ func (c *goGlobalService) BookingValuation(
 	requestLogger RequestLogger,
 	responseLogger ResponseLogger,
 ) (models.BookValuationResponse, error) {
+	if request.Version == "" {
+		request.Version = defaultRequestVersion[bookingValidation]
+	}
 	return genericDoRequest[models.BookValuationRequest, models.BookValuationRoot, models.BookValuationResponse](
 		c,
 		bookingValidation, request, requestLogger, responseLogger)
@@ -192,6 +210,9 @@ func (c *goGlobalService) BookingInsert(
 	requestLogger RequestLogger,
 	responseLogger ResponseLogger,
 ) (models.BookingInsertResponse, error) {
+	if request.Version == "" {
+		request.Version = defaultRequestVersion[bookingInsert]
+	}
 	return genericDoRequest[models.BookingInsertRequest, models.BookingInsertRoot, models.BookingInsertResponse](
 		c,
 		bookingInsert, request, requestLogger, responseLogger)
@@ -223,6 +244,9 @@ func (c *goGlobalService) AdvBookingSearch(
 	requestLogger RequestLogger,
 	responseLogger ResponseLogger,
 ) (models.AdvBookingSearchResponse, error) {
+	if request.Version == "" {
+		request.Version = defaultRequestVersion[advBookingSearch]
+	}
 	return genericDoRequest[models.AdvBookingSearchRequest, models.AdvBookingSearchRoot, models.AdvBookingSearchResponse](
 		c,
 		advBookingSearch, request, requestLogger, responseLogger)
@@ -275,6 +299,9 @@ func (c *goGlobalService) HotelInfo(
 	requestLogger RequestLogger,
 	responseLogger ResponseLogger,
 ) (models.HotelInfoResponse, error) {
+	if request.Version == "" {
+		request.Version = defaultRequestVersion[hotelInfo]
+	}
 	return genericDoRequest[models.HotelInfoRequest, models.HotelInfoRoot, models.HotelInfoResponse](
 		c,
 		hotelInfo, request, requestLogger, responseLogger)
@@ -285,6 +312,7 @@ func (c *goGlobalService) PriceBreakdown(
 	requestLogger RequestLogger,
 	responseLogger ResponseLogger,
 ) (models.PriceBreakdownResponse, error) {
+
 	return genericDoRequest[models.PriceBreakdownRequest, models.PriceBreakdownRoot, models.PriceBreakdownResponse](
 		c,
 		priceBreakdown, request, requestLogger, responseLogger)
@@ -336,7 +364,7 @@ func (c *goGlobalService) SetBaseUrl(url string) {
 }
 
 func (c *goGlobalService) doRequest(
-	operation string,
+	operation goGlobalRequest,
 	request any,
 	requestLogger RequestLogger,
 	responseLogger ResponseLogger,
@@ -345,12 +373,14 @@ func (c *goGlobalService) doRequest(
 	if err != nil {
 		return nil, err
 	}
+	credentials := c.baseCredentials
+
 	requestRoot := models.RequestRoot{
 		Header: models.Header{
-			Agency:        c.agencyId,
-			User:          c.userName,
-			Password:      c.password,
-			Operation:     operation,
+			Agency:        credentials.AgencyId,
+			User:          credentials.UserName,
+			Password:      credentials.Password,
+			Operation:     string(operation),
 			OperationType: models.OperationTypeRequest,
 		},
 		Main: encoded,
@@ -388,8 +418,8 @@ func (c *goGlobalService) doRequest(
 	req.ContentLength = int64(len(payload))
 
 	req.Header.Add("Content-Type", "text/xml; charset=utf-8")
-	req.Header.Add("API-AgencyID", c.agencyId)
-	req.Header.Add("API-Operation", operation)
+	req.Header.Add("API-AgencyID", credentials.AgencyId)
+	req.Header.Add("API-Operation", string(operation))
 	req.Header.Add("Accept", "application/json")
 
 	if requestLogger != nil {
@@ -434,7 +464,7 @@ func (c *goGlobalService) doRequest(
 
 func genericDoRequest[REQ any, ROOT models.ResponseRoot[RES], RES any](
 	service *goGlobalService,
-	operation string,
+	operation goGlobalRequest,
 	req REQ,
 	requestLogger RequestLogger,
 	responseLogger ResponseLogger,

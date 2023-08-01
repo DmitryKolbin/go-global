@@ -153,7 +153,21 @@ type HotelSearchOffer struct {
 	//Special remarks
 	Special string `json:"Special"`
 	//Is Best buy
-	Preferred bool `json:"Preferred"`
+	Preferred            bool                 `json:"Preferred"`
+	CancellationPolicies []CancellationPolicy `json:"CancellationPolicies"`
+}
+
+type CancellationPolicy struct {
+	//Policy Index starting at 1
+	Id int64 `json:"Id"`
+	//Date when policy takes affect	(dd/mm/yyyy)
+	Starting string `json:"Starting"`
+	//How to Apply the penalty
+	BasedOn string `json:"BasedOn"`
+	//Is value %(PCT|FLAT)
+	Mode string `json:"Mode"`
+	//Penalty Value to apply
+	Value float64 `json:"Value"`
 }
 
 //endregion

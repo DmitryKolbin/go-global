@@ -62,7 +62,7 @@ type BookingSearchResponse struct {
 	//Hotel search code
 	HotelSearchCode string `xml:"HotelSearchCode,omitempty"`
 	//Hotel city code
-	CityCode string `xml:"CityCode,omitempty"`
+	CityCode int64 `xml:"CityCode,omitempty"`
 	//DEPRECATED
 	RoomType string `xml:"RoomType,omitempty"`
 	//BoardBasis
@@ -127,9 +127,9 @@ type BookingSearchRoomResponse struct {
 	//Attribute - booked room description
 	Category string `xml:"Category,attr"`
 	//Attribute - The number of cots for the given room type
-	Cots       int64      `xml:"Cots,attr,omitempty"`
-	PersonName PersonName `xml:"PersonName"`
-	ExtraBed   ExtraBed   `xml:"ExtraBed"`
+	Cots       int64        `xml:"Cots,attr,omitempty"`
+	PersonName []PersonName `xml:"PersonName"`
+	ExtraBed   []ExtraBed   `xml:"ExtraBed"`
 }
 
 type Vehicle struct {

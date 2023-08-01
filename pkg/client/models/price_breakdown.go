@@ -38,8 +38,8 @@ type PriceBreakdownMainResponse struct {
 
 type PriceBreakdownResponse struct {
 	//The selected hotel
-	HotelName string             `xml:"HotelName"`
-	Room      PriceBreakdownRoom `xml:"Room"`
+	HotelName string               `xml:"HotelName"`
+	Room      []PriceBreakdownRoom `xml:"Room"`
 }
 
 type PriceBreakdownRoom struct {
@@ -49,8 +49,8 @@ type PriceBreakdownRoom struct {
 	//Number of children
 	Children int64 `xml:"Children"`
 	//Includes an Infant	0 or 1
-	Cots           int64          `xml:"Cots"`
-	PriceBreakdown PriceBreakdown `xml:"PriceBreakdown"`
+	Cots           int64            `xml:"Cots"`
+	PriceBreakdown []PriceBreakdown `xml:"PriceBreakdown"`
 }
 
 type PriceBreakdown struct {

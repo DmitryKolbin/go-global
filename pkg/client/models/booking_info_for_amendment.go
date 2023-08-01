@@ -39,7 +39,7 @@ type BookingInfoForAmendmentResponse struct {
 	//Check In Date	2013-10-08
 	ArrivalDate string `xml:"ArrivalDate"`
 	//Number of nights
-	Nights string `xml:"Nights"`
+	Nights int64 `xml:"Nights"`
 	//Room List
 	Rooms BookingInfoForAmendmenRoomsResponse `xml:"Rooms"`
 	//Remark List
