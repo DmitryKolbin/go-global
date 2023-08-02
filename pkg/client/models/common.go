@@ -50,27 +50,27 @@ const (
 	RoomBasisBd = "BD"
 
 	//Start1 1 star
-	Start1 = "1"
+	Start1 = 1
 	//Start1point5 1.5 stars
-	Start1point5 = "2"
+	Start1point5 = 2
 	//Start2 2 stars
-	Start2 = "3"
+	Start2 = 3
 	//Start2point5 2.5 stars
-	Start2point5 = "4"
+	Start2point5 = 4
 	//Start3 3 stars
-	Start3 = "5"
+	Start3 = 5
 	//Start3point5 3.5 stars
-	Start3point5 = "6"
+	Start3point5 = 6
 	//Start4 4 stars
-	Start4 = "7"
+	Start4 = 7
 	//Start4point5 4.5 star
-	Start4point5 = "8"
+	Start4point5 = 8
 	//Start5 5 stars
-	Start5 = "9"
+	Start5 = 9
 	//Start5point5 5.5 stars
-	Start5point5 = "10"
+	Start5point5 = 10
 	//Start6 6 stars
-	Start6 = "11"
+	Start6 = 11
 
 	//SortByPriceAsc first lowest prices
 	SortByPriceAsc = "1"

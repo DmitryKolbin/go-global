@@ -23,7 +23,7 @@ type Hotel struct {
 	Phone       string  `csv:"Phone"`
 	Fax         string  `csv:"Fax"`
 	Stars       string  `csv:"Stars"`
-	StarsID     string  `csv:"StarsID"`
+	StarsID     int64   `csv:"StarsID"`
 	Longitude   float64 `csv:"Longitude"`
 	Latitude    float64 `csv:"Latitude"`
 	IsApartment bool    `csv:"IsApartment"`
