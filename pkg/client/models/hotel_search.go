@@ -167,7 +167,7 @@ type CancellationPolicy struct {
 	//Is value %(PCT|FLAT)
 	Mode string `json:"Mode"`
 	//Penalty Value to apply
-	Value float64 `json:"Value"`
+	Value string `json:"Value"`
 }
 
 //endregion
