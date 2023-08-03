@@ -11,6 +11,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"regexp"
 
 	"github.com/DmitryKolbin/go-global/pkg/client/models"
 	"github.com/dimchansky/utfbom"
@@ -517,6 +518,10 @@ func (c *goGlobalService) doRequest(
 	}
 	response := models.EnvelopeResponse{}
 
+	//assume that data in response contain &#x0000 characters only when it's typed by mistake
+	//and remove them cause it break go xml decoder
+	re := regexp.MustCompile(`&#x[\da-fA-F]+;`)
+	body = []byte(re.ReplaceAllString(string(body), ""))
 	err = xml.Unmarshal(body, &response)
 	if err != nil {
 		return nil, fmt.Errorf("can't parse response: %w", err)
