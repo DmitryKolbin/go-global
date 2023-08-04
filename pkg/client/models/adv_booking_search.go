@@ -72,7 +72,7 @@ type AdvBookingSearchResponse struct {
 }
 
 type AdvBookingSearchBooking struct {
-	XMLName xml.Name `xml:"Bookings"`
+	XMLName xml.Name `xml:"Booking"`
 	//The Go booking code
 	GoBookingCode string `xml:"GoBookingCode"`
 	//The Go Reference
