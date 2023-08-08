@@ -82,7 +82,7 @@ type AdvBookingSearchBooking struct {
 	//Date of creation (yyyy-MM-dd HH:mm)
 	CreatedDate string `xml:"CreatedDate"`
 	//Id of Agency - usually same as credentials
-	AgencyID string `xml:"AgencyID"`
+	AgencyID int64 `xml:"AgencyID"`
 	//Name of agency - usually belonging to the credentials
 	AgencyName string `xml:"AgencyName"`
 	//The status of the booking RQ, X, C etc.

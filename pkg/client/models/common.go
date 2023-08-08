@@ -1,6 +1,7 @@
 package models
 
 import (
+	"encoding/json"
 	"encoding/xml"
 )
 
@@ -150,7 +151,7 @@ type RequestRoot struct {
 type Header struct {
 	XMLName xml.Name `xml:"Header"`
 	//Agency/Client Identification
-	Agency string `xml:"Agency" json:"Agency"`
+	Agency json.Number `xml:"Agency" json:"Agency"`
 	//UserName
 	User string `xml:"User" json:"User"`
 	//User password

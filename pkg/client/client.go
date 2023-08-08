@@ -12,6 +12,7 @@ import (
 	"log"
 	"net/http"
 	"regexp"
+	"strconv"
 
 	"github.com/DmitryKolbin/go-global/pkg/client/models"
 	"github.com/dimchansky/utfbom"
@@ -20,7 +21,7 @@ import (
 
 const (
 	getDestinationsUrl = "https://static-data.tourismcloudservice.com/propsdata/Destinations/compress/true"
-	getHotelsUrlFmt    = "https://static-data.tourismcloudservice.com/agency/hotels/%s"
+	getHotelsUrlFmt    = "https://static-data.tourismcloudservice.com/agency/hotels/%d"
 
 	searchRequest           = goGlobalRequest("HOTEL_SEARCH_REQUEST")
 	bookingValidation       = goGlobalRequest("BOOKING_VALUATION_REQUEST")
@@ -81,10 +82,10 @@ type GoGlobalService interface {
 }
 
 type RequestLogger func(r *http.Request) error
-type ResponseLogger func(r *http.Response) error
+type ResponseLogger func(r *http.Response, responseBody []byte, isError bool) error
 
 type Credentials struct {
-	AgencyId string
+	AgencyId int64
 	UserName string
 	Password string
 }
@@ -174,7 +175,14 @@ func (c *goGlobalService) Search(
 		request.Version = defaultRequestVersion[searchRequest]
 	}
 	results := models.HotelSearchResponse{}
-	response, err := c.doRequest(credentials, searchRequest, request, requestLogger, responseLogger)
+
+	var resp *http.Response
+	var respBody []byte
+	response, err := c.doRequest(credentials, searchRequest, request, requestLogger, func(r *http.Response, body []byte, isError bool) error {
+		resp = r
+		respBody = body
+		return nil
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -185,7 +193,19 @@ func (c *goGlobalService) Search(
 	}
 
 	if results.Header.OperationType == models.OperationTypeError || results.Header.OperationType == models.OperationTypeMessage {
+		if responseLogger != nil {
+			err = responseLogger(resp, respBody, true)
+			if err != nil {
+				return nil, fmt.Errorf("cant't save responsee log with error code: %d, message: %s; actual error %v", results.Main.Error.Code, results.Main.Error.Message, err)
+			}
+		}
 		return nil, fmt.Errorf("code: %d, message: %s", results.Main.Error.Code, results.Main.Error.Message)
+	}
+	if responseLogger != nil {
+		err = responseLogger(resp, respBody, false)
+		if err != nil {
+			return nil, fmt.Errorf("cant't save responsee log")
+		}
 	}
 
 	return results.Hotels, nil
@@ -441,7 +461,7 @@ func (c *goGlobalService) doRequest(
 	}
 	requestRoot := models.RequestRoot{
 		Header: models.Header{
-			Agency:        credentials.AgencyId,
+			Agency:        json.Number(strconv.FormatInt(credentials.AgencyId, 10)),
 			User:          credentials.UserName,
 			Password:      credentials.Password,
 			Operation:     string(operation),
@@ -482,7 +502,7 @@ func (c *goGlobalService) doRequest(
 	req.ContentLength = int64(len(payload))
 
 	req.Header.Add("Content-Type", "text/xml; charset=utf-8")
-	req.Header.Add("API-AgencyID", credentials.AgencyId)
+	req.Header.Add("API-AgencyID", strconv.FormatInt(credentials.AgencyId, 10))
 	req.Header.Add("API-Operation", string(operation))
 	req.Header.Add("Accept", "application/json")
 
@@ -510,8 +530,12 @@ func (c *goGlobalService) doRequest(
 	}()
 
 	body, err := io.ReadAll(resp.Body)
-	if err == nil && responseLogger != nil {
-		err2 := responseLogger(resp)
+	if err != nil {
+		return nil, err
+	}
+
+	if responseLogger != nil {
+		err2 := responseLogger(resp, body, false)
 		if err2 != nil {
 			log.Printf("save response error: %v \n", err)
 		}
@@ -539,7 +563,15 @@ func genericDoRequest[REQ any, ROOT models.ResponseRoot[RES], RES any](
 	responseLogger ResponseLogger,
 ) (RES, error) {
 	var response RES
-	xmlResponse, err := service.doRequest(credentials, operation, req, requestLogger, responseLogger)
+
+	var resp *http.Response
+	var respBody []byte
+
+	xmlResponse, err := service.doRequest(credentials, operation, req, requestLogger, func(r *http.Response, body []byte, isError bool) error {
+		resp = r
+		respBody = body
+		return nil
+	})
 	if err != nil {
 		return response, err
 	}
@@ -551,8 +583,22 @@ func genericDoRequest[REQ any, ROOT models.ResponseRoot[RES], RES any](
 	}
 
 	if err = root.CheckError(); err != nil {
+		if responseLogger != nil {
+			err2 := responseLogger(resp, respBody, true)
+			if err2 != nil {
+				return response, fmt.Errorf("cant't save responsee log with error %v, actual eror %v", err, err2)
+			}
+		}
 		return response, err
 	}
+
+	if responseLogger != nil {
+		err = responseLogger(resp, respBody, false)
+		if err != nil {
+			return response, fmt.Errorf("cant't save responsee log")
+		}
+	}
+
 	response = root.GetResponse()
 	return response, nil
 }
