@@ -174,7 +174,7 @@ type Commission struct {
 	XMLName xml.Name `xml:"Commission"`
 	//Attribute - The Comm % value - with IncludeCommission
 	Pct   float64 `xml:"pct,attr"`
-	Value float64 `xml:",chardata"`
+	Value string  `xml:",chardata"`
 }
 
 type RoomsResponse struct {

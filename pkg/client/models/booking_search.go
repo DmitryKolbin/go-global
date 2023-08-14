@@ -104,7 +104,7 @@ type BookingSearchResponse struct {
 type GrossPrice struct {
 	XMLName  xml.Name `xml:"GrossPrice"`
 	Currency string   `xml:"Currency,attr"`
-	Value    float64  `xml:",chardata"`
+	Value    string   `xml:",chardata"`
 }
 
 type BookingSearchRoomsResponse struct {

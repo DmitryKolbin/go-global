@@ -11,6 +11,8 @@ type AdvBookingSearchRequest struct {
 	Version string `xml:"Version,attr"`
 	//Attribute to request payments in response - default false
 	IncludePayments bool `xml:"IncludePayments,attr,omitempty"`
+	//Attribute to request commission in response - default false
+	IncludeCommission bool `xml:"IncludeCommission,attr,omitempty"`
 	//Search also hierarchy agencies
 	IncludeSubAgencies bool `xml:"IncludeSubAgencies,omitempty"`
 	//Return full (default) or short (no rooms/pax) details
@@ -93,6 +95,8 @@ type AdvBookingSearchBooking struct {
 	Currency string `xml:"Currency"`
 	//The total agent price
 	GrossPrice GrossPrice `xml:"GrossPrice,omitempty"`
+	//The Comm flat value - with IncludeCommission
+	Commission Commission `xml:"Commission,omitempty"`
 	//Name of the Hotel
 	HotelName string `xml:"HotelName,omitempty"`
 	//Hotel city code
