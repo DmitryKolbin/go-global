@@ -507,15 +507,10 @@ func (c *goGlobalService) doRequest(
 	req.Header.Add("Accept", "application/json")
 
 	if requestLogger != nil {
-		defer func() {
-			go func() {
-				err2 := requestLogger(req)
-				if err2 != nil {
-					log.Printf("save request error: %v \n", err)
-				}
-
-			}()
-		}()
+		err2 := requestLogger(req)
+		if err2 != nil {
+			log.Printf("save request error: %v \n", err2)
+		}
 	}
 
 	resp, err := c.client.Do(req)
@@ -537,7 +532,7 @@ func (c *goGlobalService) doRequest(
 	if responseLogger != nil {
 		err2 := responseLogger(resp, body, false)
 		if err2 != nil {
-			log.Printf("save response error: %v \n", err)
+			log.Printf("save response error: %v \n", err2)
 		}
 	}
 	response := models.EnvelopeResponse{}
