@@ -127,9 +127,9 @@ type BookingSearchRoomResponse struct {
 	//Attribute - booked room description
 	Category string `xml:"Category,attr"`
 	//Attribute - The number of cots for the given room type
-	Cots       int64        `xml:"Cots,attr,omitempty"`
-	PersonName []PersonName `xml:"PersonName"`
-	ExtraBed   []ExtraBed   `xml:"ExtraBed"`
+	Cots       int64                     `xml:"Cots,attr,omitempty"`
+	PersonName []PersonNameBookingSearch `xml:"PersonName"`
+	ExtraBed   []ExtraBed                `xml:"ExtraBed"`
 }
 
 type Vehicle struct {
