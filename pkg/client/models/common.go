@@ -37,6 +37,8 @@ const (
 
 	//RoomBasisBb BED AND BREAKFAST
 	RoomBasisBb = "BB"
+	//RoomBasisBb2 BED AND BREAKFAST UP TO 2
+	RoomBasisBb2 = "BB2"
 	//RoomBasisCb CONTINENTAL BREAKFAST
 	RoomBasisCb = "CB"
 	//RoomBasisAi ALL-INCLUSIVE
