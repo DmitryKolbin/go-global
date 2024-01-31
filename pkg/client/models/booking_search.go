@@ -57,6 +57,8 @@ type BookingSearchResponse struct {
 	GrossPrice GrossPrice `xml:"GrossPrice,omitempty"`
 	//The Comm flat value - with IncludeCommission
 	Commission Commission `xml:"Commission"`
+	//Id of the booked hotel
+	HotelId int64 `xml:"HotelId"`
 	//Name of the Hotel
 	HotelName string `xml:"HotelName,omitempty"`
 	//Hotel search code

@@ -55,7 +55,7 @@ var requestTypes = map[goGlobalRequest]int64{
 }
 var defaultRequestVersion = map[goGlobalRequest]string{
 	searchRequest:     "2.4",
-	bookingValidation: "2.0",
+	bookingValidation: "2.4",
 	bookingInsert:     "2.3",
 	bookingSearch:     "2.2",
 	advBookingSearch:  "2.2",

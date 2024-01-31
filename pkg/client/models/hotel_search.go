@@ -18,6 +18,8 @@ type HotelSearchRequest struct {
 	Currency string `xml:"Currency,attr,omitempty"`
 	//Attribute to request commission in response - default false
 	IncludeCommission bool `xml:"IncludeCommission,attr,omitempty"`
+	//Attribute to request TotalTax and RoomRate when available - default false
+	ReturnTaxData bool `xml:"ReturnTaxData,attr,omitempty"`
 	//Attribute to request general hotel facilities in response - default false
 	HotelFacilities string `xml:"HotelFacilities,attr,omitempty"`
 	//Attribute to request general room facilities in response - default false
@@ -142,6 +144,10 @@ type HotelSearchOffer struct {
 	TotalPrice float64 `json:"TotalPrice"`
 	//ISO Currency code
 	Currency string `json:"Currency"`
+	// Total Tax for booking
+	TotalTax float64 `json:"TotalTax"`
+	// Total without tax
+	RoomRate float64 `json:"RoomRate"`
 	//The Comm flat value
 	CommPercent *float64 `json:"CommPercent"`
 	//The Comm % value
@@ -159,15 +165,15 @@ type HotelSearchOffer struct {
 
 type CancellationPolicy struct {
 	//Policy Index starting at 1
-	Id int64 `json:"Id"`
+	Id int64 `json:"Id" xml:"Id,attr"`
 	//Date when policy takes affect	(dd/mm/yyyy)
-	Starting string `json:"Starting"`
+	Starting string `json:"Starting" xml:"Starting,attr"`
 	//How to Apply the penalty
-	BasedOn string `json:"BasedOn"`
+	BasedOn string `json:"BasedOn" xml:"BasedOn,attr"`
 	//Is value %(PCT|FLAT)
-	Mode string `json:"Mode"`
+	Mode string `json:"Mode" xml:"Mode,attr"`
 	//Penalty Value to apply
-	Value string `json:"Value"`
+	Value string `json:"Value" xml:",chardata"`
 }
 
 //endregion

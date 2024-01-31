@@ -13,6 +13,8 @@ type BookValuationRequest struct {
 	HotelSearchCode string `xml:"HotelSearchCode"`
 	//Check-in Date (yyyy-MM-dd)
 	ArrivalDate string `xml:"ArrivalDate"`
+	//Attribute to request TotalTax and RoomRate when available - default false
+	ReturnTaxData bool `xml:"ReturnTaxData,attr,omitempty"`
 }
 
 type BookValuationRoot struct {
@@ -40,12 +42,20 @@ type BookValuationMainResponse struct {
 	ErrorResponse
 }
 
+type CancellationPolicies struct {
+	XMLName xml.Name             `xml:"CancellationPolicies"`
+	Policy  []CancellationPolicy `xml:"Policy"`
+}
+
 type BookValuationResponse struct {
-	HotelSearchCode      string            `xml:"HotelSearchCode"`
-	ArrivalDate          string            `xml:"ArrivalDate"`
-	CancellationDeadline string            `xml:"CancellationDeadline"`
-	Remarks              string            `xml:"Remarks"`
-	Rates                BookValuationRate `xml:"Rates"`
+	HotelSearchCode      string               `xml:"HotelSearchCode"`
+	ArrivalDate          string               `xml:"ArrivalDate"`
+	CancellationDeadline string               `xml:"CancellationDeadline"`
+	Remarks              string               `xml:"Remarks"`
+	Rates                BookValuationRate    `xml:"Rates"`
+	TotalTax             float64              `xml:"TotalTax"`
+	RoomRate             float64              `xml:"RoomRate"`
+	CancellationPolicies CancellationPolicies `xml:"CancellationPolicies"`
 }
 
 type BookValuationRate struct {

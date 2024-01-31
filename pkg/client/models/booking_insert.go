@@ -13,6 +13,8 @@ type BookingInsertRequest struct {
 	IncludePayments bool `xml:"IncludePayments,attr,omitempty"`
 	//Attribute to request commission in response - default false
 	IncludeCommission bool `xml:"IncludeCommission,attr,omitempty"`
+	//Attribute to request TotalTax and RoomRate when available - default false
+	ReturnTaxData bool `xml:"ReturnTaxData,attr,omitempty"`
 	//Agent Reference
 	AgentReference string `xml:"AgentReference"`
 	//The Hotel search code of the chosen hotel
@@ -148,6 +150,10 @@ type BookingInsertResponse struct {
 	TotalPrice float64 `xml:"TotalPrice"`
 	//Currency
 	Currency string `xml:"Currency"`
+	// Total Tax for booking
+	TotalTax float64 `xml:"TotalTax"`
+	// Total without tax
+	RoomRate float64 `xml:"RoomRate"`
 	//The Comm flat value - with IncludeCommission
 	Commission Commission `xml:"Commission"`
 	//Id of the Hotel - Version 2+ Only

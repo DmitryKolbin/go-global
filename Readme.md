@@ -1,6 +1,6 @@
 # Go library for Go Global Travel
 
-documentation: https://data.goglobal.travel/specs/XmlSpecs_v3.15.html
+documentation: https://data.goglobal.travel/specs/XmlSpecs_LatestVersion.html
 
 Example of usage:
 ```
