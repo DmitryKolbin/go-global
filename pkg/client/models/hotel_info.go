@@ -2,7 +2,6 @@ package models
 
 import (
 	"encoding/xml"
-	"fmt"
 )
 
 // HotelInfoRequest receive addition information about hotel
@@ -27,7 +26,7 @@ type HotelInfoRoot struct {
 
 func (r HotelInfoRoot) CheckError() error {
 	if r.Header.OperationType == OperationTypeError || r.Header.OperationType == OperationTypeMessage || r.Main.Error.Code > 0 {
-		return fmt.Errorf("code: %d, message: %s", r.Main.Error.Code, r.Main.Error.Message)
+		return r.Main.ErrorResponse.Error
 	}
 
 	return nil

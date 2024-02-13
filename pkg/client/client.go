@@ -199,7 +199,7 @@ func (c *goGlobalService) Search(
 				return nil, fmt.Errorf("cant't save responsee log with error code: %d, message: %s; actual error %v", results.Main.Error.Code, results.Main.Error.Message, err)
 			}
 		}
-		return nil, fmt.Errorf("code: %d, message: %s", results.Main.Error.Code, results.Main.Error.Message)
+		return nil, results.Main.Error
 	}
 	if responseLogger != nil {
 		err = responseLogger(resp, respBody, false)
@@ -220,7 +220,7 @@ func (c *goGlobalService) BookingValuation(
 	if request.Version == "" {
 		request.Version = defaultRequestVersion[bookingValidation]
 	}
-	return genericDoRequest[models.BookValuationRequest, models.BookValuationRoot, models.BookValuationResponse](
+	r, err := genericDoRequest[models.BookValuationRequest, models.BookValuationRoot, models.BookValuationResponse](
 		credentials,
 		c,
 		bookingValidation,
@@ -228,6 +228,7 @@ func (c *goGlobalService) BookingValuation(
 		requestLogger,
 		responseLogger,
 	)
+	return r, err
 }
 
 func (c *goGlobalService) BookingInsert(

@@ -3,6 +3,7 @@ package models
 import (
 	"encoding/json"
 	"encoding/xml"
+	"fmt"
 )
 
 const (
@@ -205,6 +206,11 @@ type GoGlobalError struct {
 	Code    int64    `xml:"code,attr" json:"Code"`
 	Message string   `xml:",cdata" json:"Message"`
 }
+
+func (e GoGlobalError) Error() string {
+	return fmt.Sprintf("code: %d, message: %s", e.Code, e.Message)
+}
+
 type GoGlobalDebugError struct {
 	XMLName     xml.Name `xml:"DebugError" json:"-"`
 	Incident    int64    `xml:"incident,attr" json:"Incident"`

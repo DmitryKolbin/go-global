@@ -2,7 +2,6 @@ package models
 
 import (
 	"encoding/xml"
-	"fmt"
 )
 
 type BookingAmendmentRequest struct {
@@ -25,7 +24,7 @@ type BookingAmendmentRoot struct {
 
 func (r BookingAmendmentRoot) CheckError() error {
 	if r.Header.OperationType == OperationTypeError || r.Header.OperationType == OperationTypeMessage {
-		return fmt.Errorf("code: %d, message: %s", r.Main.Error.Code, r.Main.Error.Message)
+		return r.Main.ErrorResponse.Error
 	}
 
 	return nil

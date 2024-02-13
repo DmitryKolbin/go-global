@@ -2,7 +2,6 @@ package models
 
 import (
 	"encoding/xml"
-	"fmt"
 )
 
 type BookingSearchRequest struct {
@@ -23,7 +22,7 @@ type BookingSearchRoot struct {
 
 func (r BookingSearchRoot) CheckError() error {
 	if r.Header.OperationType == OperationTypeError || r.Header.OperationType == OperationTypeMessage {
-		return fmt.Errorf("code: %d, message: %s", r.Main.Error.Code, r.Main.Error.Message)
+		return r.Main.ErrorResponse.Error
 	}
 
 	return nil
