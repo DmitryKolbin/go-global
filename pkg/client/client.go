@@ -3,6 +3,7 @@ package client
 import (
 	"archive/zip"
 	"bytes"
+	"compress/gzip"
 	"context"
 	"encoding/csv"
 	"encoding/json"
@@ -531,6 +532,7 @@ func (c *goGlobalService) doRequest(
 	req.Header.Add("API-AgencyID", strconv.FormatInt(credentials.AgencyId, 10))
 	req.Header.Add("API-Operation", string(operation))
 	req.Header.Add("Accept", "application/json")
+	req.Header.Add("Accept-Encoding", "gzip")
 
 	if requestLogger != nil {
 		err2 := requestLogger(req)
@@ -550,9 +552,22 @@ func (c *goGlobalService) doRequest(
 		}
 	}()
 
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
+	var body []byte
+	if resp.Header.Get("Content-Encoding") == "gzip" {
+		reader, err := gzip.NewReader(resp.Body)
+		if err != nil {
+			return nil, err
+		}
+
+		body, err = io.ReadAll(reader)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		body, err = io.ReadAll(resp.Body)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	if responseLogger != nil {
