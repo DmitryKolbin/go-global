@@ -25,7 +25,7 @@ type HotelInfoRoot struct {
 }
 
 func (r HotelInfoRoot) CheckError() error {
-	if r.Header.OperationType == OperationTypeError || r.Header.OperationType == OperationTypeMessage || r.Main.Error.Code > 0 {
+	if r.Header.OperationType == OperationTypeError || r.Header.OperationType == OperationTypeMessage || r.Main.Error.Code > 0 || len(r.Main.Error.Message) > 0 {
 		return r.Main.ErrorResponse.Error
 	}
 
