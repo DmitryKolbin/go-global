@@ -93,6 +93,8 @@ const (
 	StatusReqCancellation = "RX"
 	//StatusCancelled Booking canceled FOC
 	StatusCancelled = "X"
+	//StatusCancelledWithPenalty Cancelled with Penalty Charges
+	StatusCancelledWithPenalty = "XP"
 	//StatusRejected Booking was rejected
 	StatusRejected = "RJ"
 	//StatusVoucherIssued Issued	Booking is finalized, confirmed and the voucher was issued
