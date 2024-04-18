@@ -59,7 +59,7 @@ type RoomTypeRequest struct {
 type RoomRequest struct {
 	XMLName xml.Name `xml:"Room"`
 	//Attribute - A unique room ID for each type - incremental
-	RoomId     int64        `xml:"RoomId,attr"`
+	RoomId     int64        `xml:"RoomID,attr"`
 	PersonName []PersonName `xml:"PersonName"`
 	ExtraBed   []ExtraBed   `xml:"ExtraBed"`
 }
@@ -212,7 +212,7 @@ type RoomTypeResponse struct {
 type RoomResponse struct {
 	XMLName xml.Name `xml:"Room"`
 	//Attribute - A unique room ID for each type - incremental
-	RoomId int64 `xml:"RoomId,attr"`
+	RoomId int64 `xml:"RoomID,attr"`
 	//Attribute - booked room description
 	Category   string       `xml:"Category,attr"`
 	PersonName []PersonName `xml:"PersonName"`
