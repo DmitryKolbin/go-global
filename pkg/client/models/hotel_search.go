@@ -86,7 +86,7 @@ type SearchRoom struct {
 	// Attribute for number of cots in the room. Only 1 cot is allowed per room
 	CotCount int64 `xml:"CotCount,attr,omitempty"`
 	// If specified - age of child in this room.
-	ChildAge []int64 `xml:"ChildAge,omitempty"`
+	ChildAge []int64 `xml:"ChildAge"`
 }
 
 // region response
