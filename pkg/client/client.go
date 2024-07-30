@@ -233,7 +233,15 @@ func (c *goGlobalService) BookingValuation(
 		requestLogger,
 		responseLogger,
 	)
-	return r, err
+	if err != nil {
+		return r, err
+	}
+
+	if r.Rates.Currency == "" {
+		r.Rates.Currency = r.Rates.CurrencyUpper
+	}
+
+	return r, nil
 }
 
 func (c *goGlobalService) BookingInsert(

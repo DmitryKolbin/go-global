@@ -58,7 +58,8 @@ type BookValuationResponse struct {
 }
 
 type BookValuationRate struct {
-	XMLName  xml.Name `xml:"Rates"`
-	Currency string   `xml:"Currency,attr"`
-	Value    float64  `xml:",chardata"`
+	XMLName       xml.Name `xml:"Rates"`
+	Currency      string   `xml:"currency,attr"`
+	CurrencyUpper string   `xml:"Currency,attr"` // in docs currency attribute is lower case. this is fallback for some cases
+	Value         float64  `xml:",chardata"`
 }
