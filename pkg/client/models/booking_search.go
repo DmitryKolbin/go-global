@@ -130,7 +130,31 @@ type BookingSearchRoomResponse struct {
 	//Attribute - The number of cots for the given room type
 	Cots       int64                     `xml:"Cots,attr,omitempty"`
 	PersonName []PersonNameBookingSearch `xml:"PersonName"`
-	ExtraBed   []ExtraBed                `xml:"ExtraBed"`
+	ExtraBed   []ExtraBedBookingSearch   `xml:"ExtraBed"`
+}
+
+type PersonNameBookingSearch struct {
+	XMLName xml.Name `xml:"PersonName"`
+	//Attribute - A unique Person ID for the booking - incremental
+	PersonID int64 `xml:"PersonID,attr"`
+	//Pax Title - Version 2+ only
+	Title string `xml:"Title"`
+	//Adult First Name - Version 2+ only
+	FirstName string `xml:"FirstName"`
+	//Adult Last Name - Version 2+ only
+	LastName string `xml:"LastName"`
+}
+
+type ExtraBedBookingSearch struct {
+	XMLName xml.Name `xml:"ExtraBed"`
+	//Attribute - A unique Person ID for the booking
+	PersonID int64 `xml:"PersonID,attr"`
+	//Pax First Name
+	FirstName string `xml:"FirstName"`
+	//Pax Last Name
+	LastName string `xml:"LastName"`
+	//Attribute - The age of the child
+	ChildAge int64 `xml:"ChildAge"`
 }
 
 type Vehicle struct {

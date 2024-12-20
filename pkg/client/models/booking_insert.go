@@ -76,18 +76,6 @@ type PersonName struct {
 	LastName string `xml:"LastName,attr"`
 }
 
-type PersonNameBookingSearch struct {
-	XMLName xml.Name `xml:"PersonName"`
-	//Attribute - A unique Person ID for the booking - incremental
-	PersonID int64 `xml:"PersonID,attr"`
-	//Pax Title - Version 2+ only
-	Title string `xml:"Title"`
-	//Adult First Name - Version 2+ only
-	FirstName string `xml:"FirstName"`
-	//Adult Last Name - Version 2+ only
-	LastName string `xml:"LastName"`
-}
-
 type ExtraBed struct {
 	XMLName xml.Name `xml:"ExtraBed"`
 	//Attribute - A unique Person ID for the booking - incremental - with adults
