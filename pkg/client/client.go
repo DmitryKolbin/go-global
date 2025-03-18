@@ -3,7 +3,6 @@ package client
 import (
 	"archive/zip"
 	"bytes"
-	"compress/gzip"
 	"context"
 	"encoding/csv"
 	"encoding/json"
@@ -69,22 +68,19 @@ var defaultRequestVersion = map[goGlobalRequest]string{
 type GoGlobalService interface {
 	GetDestinations(context.Context, Credentials) ([]*Destination, error)
 	GetHotels(context.Context, Credentials) ([]*Hotel, error)
-	Search(context.Context, Credentials, models.HotelSearchRequest, RequestLogger, ResponseLogger) ([]models.HotelSearchResponseItem, error)
-	BookingValuation(context.Context, Credentials, models.BookValuationRequest, RequestLogger, ResponseLogger) (models.BookValuationResponse, error)
-	BookingInsert(context.Context, Credentials, models.BookingInsertRequest, RequestLogger, ResponseLogger) (models.BookingInsertResponse, error)
-	BookingStatus(context.Context, Credentials, models.BookingStatusRequest, RequestLogger, ResponseLogger) (models.BookingStatusResponse, error)
-	BookingSearch(context.Context, Credentials, models.BookingSearchRequest, RequestLogger, ResponseLogger) (models.BookingSearchResponse, error)
-	AdvBookingSearch(context.Context, Credentials, models.AdvBookingSearchRequest, RequestLogger, ResponseLogger) (models.AdvBookingSearchResponse, error)
-	BookingCancel(context.Context, Credentials, models.BookingCancelRequest, RequestLogger, ResponseLogger) (models.BookingCancelResponse, error)
-	VoucherDetails(context.Context, Credentials, models.VoucherDetailsRequest, RequestLogger, ResponseLogger) (models.VoucherDetailsResponse, error)
-	BookingInfoForAmendment(context.Context, Credentials, models.BookingInfoForAmendmentRequest, RequestLogger, ResponseLogger) (models.BookingInfoForAmendmentResponse, error)
-	BookingAmendment(context.Context, Credentials, models.BookingAmendmentRequest, RequestLogger, ResponseLogger) error
-	HotelInfo(context.Context, Credentials, models.HotelInfoRequest, RequestLogger, ResponseLogger) (models.HotelInfoResponse, error)
-	PriceBreakdown(context.Context, Credentials, models.PriceBreakdownRequest, RequestLogger, ResponseLogger) (models.PriceBreakdownResponse, error)
+	Search(context.Context, Credentials, models.HotelSearchRequest) ([]models.HotelSearchResponseItem, error)
+	BookingValuation(context.Context, Credentials, models.BookValuationRequest) (models.BookValuationResponse, error)
+	BookingInsert(context.Context, Credentials, models.BookingInsertRequest) (models.BookingInsertResponse, error)
+	BookingStatus(context.Context, Credentials, models.BookingStatusRequest) (models.BookingStatusResponse, error)
+	BookingSearch(context.Context, Credentials, models.BookingSearchRequest) (models.BookingSearchResponse, error)
+	AdvBookingSearch(context.Context, Credentials, models.AdvBookingSearchRequest) (models.AdvBookingSearchResponse, error)
+	BookingCancel(context.Context, Credentials, models.BookingCancelRequest) (models.BookingCancelResponse, error)
+	VoucherDetails(context.Context, Credentials, models.VoucherDetailsRequest) (models.VoucherDetailsResponse, error)
+	BookingInfoForAmendment(context.Context, Credentials, models.BookingInfoForAmendmentRequest) (models.BookingInfoForAmendmentResponse, error)
+	BookingAmendment(context.Context, Credentials, models.BookingAmendmentRequest) error
+	HotelInfo(context.Context, Credentials, models.HotelInfoRequest) (models.HotelInfoResponse, error)
+	PriceBreakdown(context.Context, Credentials, models.PriceBreakdownRequest) (models.PriceBreakdownResponse, error)
 }
-
-type RequestLogger func(r *http.Request) error
-type ResponseLogger func(r *http.Response, responseBody []byte, isError bool) error
 
 type Credentials struct {
 	AgencyId int64
@@ -94,15 +90,16 @@ type Credentials struct {
 
 type goGlobalService struct {
 	baseUrl string
-	client  *http.Client
+	client  HttpClient
 }
 
 func NewGoGlobalService(
 	apiUrl string,
+	client HttpClient,
 ) GoGlobalService {
 	return &goGlobalService{
 		baseUrl: apiUrl,
-		client:  &http.Client{},
+		client:  client,
 	}
 }
 
@@ -171,21 +168,13 @@ func (c *goGlobalService) Search(
 	ctx context.Context,
 	credentials Credentials,
 	request models.HotelSearchRequest,
-	requestLogger RequestLogger,
-	responseLogger ResponseLogger,
 ) ([]models.HotelSearchResponseItem, error) {
 	if request.Version == "" {
 		request.Version = defaultRequestVersion[searchRequest]
 	}
 	results := models.HotelSearchResponse{}
 
-	var resp *http.Response
-	var respBody []byte
-	response, err := c.doRequest(ctx, credentials, searchRequest, request, requestLogger, func(r *http.Response, body []byte, isError bool) error {
-		resp = r
-		respBody = body
-		return nil
-	})
+	response, err := c.doRequest(ctx, credentials, searchRequest, request)
 	if err != nil {
 		return nil, err
 	}
@@ -196,19 +185,7 @@ func (c *goGlobalService) Search(
 	}
 
 	if results.Header.OperationType == models.OperationTypeError || results.Header.OperationType == models.OperationTypeMessage {
-		if responseLogger != nil {
-			err = responseLogger(resp, respBody, true)
-			if err != nil {
-				return nil, fmt.Errorf("cant't save responsee log with error code: %d, message: %s; actual error %v", results.Main.Error.Code, results.Main.Error.Message, err)
-			}
-		}
 		return nil, results.Main.Error
-	}
-	if responseLogger != nil {
-		err = responseLogger(resp, respBody, false)
-		if err != nil {
-			return nil, fmt.Errorf("cant't save responsee log")
-		}
 	}
 
 	return results.Hotels, nil
@@ -218,8 +195,6 @@ func (c *goGlobalService) BookingValuation(
 	ctx context.Context,
 	credentials Credentials,
 	request models.BookValuationRequest,
-	requestLogger RequestLogger,
-	responseLogger ResponseLogger,
 ) (models.BookValuationResponse, error) {
 	if request.Version == "" {
 		request.Version = defaultRequestVersion[bookingValidation]
@@ -230,8 +205,6 @@ func (c *goGlobalService) BookingValuation(
 		c,
 		bookingValidation,
 		request,
-		requestLogger,
-		responseLogger,
 	)
 	if err != nil {
 		return r, err
@@ -248,8 +221,6 @@ func (c *goGlobalService) BookingInsert(
 	ctx context.Context,
 	credentials Credentials,
 	request models.BookingInsertRequest,
-	requestLogger RequestLogger,
-	responseLogger ResponseLogger,
 ) (models.BookingInsertResponse, error) {
 	if request.Version == "" {
 		request.Version = defaultRequestVersion[bookingInsert]
@@ -260,8 +231,6 @@ func (c *goGlobalService) BookingInsert(
 		c,
 		bookingInsert,
 		request,
-		requestLogger,
-		responseLogger,
 	)
 
 }
@@ -270,8 +239,6 @@ func (c *goGlobalService) BookingStatus(
 	ctx context.Context,
 	credentials Credentials,
 	request models.BookingStatusRequest,
-	requestLogger RequestLogger,
-	responseLogger ResponseLogger,
 ) (models.BookingStatusResponse, error) {
 	return genericDoRequest[models.BookingStatusRequest, models.BookingStatusRoot, models.BookingStatusResponse](
 		ctx,
@@ -279,8 +246,6 @@ func (c *goGlobalService) BookingStatus(
 		c,
 		bookingStatus,
 		request,
-		requestLogger,
-		responseLogger,
 	)
 }
 
@@ -288,8 +253,6 @@ func (c *goGlobalService) BookingSearch(
 	ctx context.Context,
 	credentials Credentials,
 	request models.BookingSearchRequest,
-	requestLogger RequestLogger,
-	responseLogger ResponseLogger,
 ) (models.BookingSearchResponse, error) {
 	return genericDoRequest[models.BookingSearchRequest, models.BookingSearchRoot, models.BookingSearchResponse](
 		ctx,
@@ -297,8 +260,6 @@ func (c *goGlobalService) BookingSearch(
 		c,
 		bookingSearch,
 		request,
-		requestLogger,
-		responseLogger,
 	)
 }
 
@@ -306,8 +267,6 @@ func (c *goGlobalService) AdvBookingSearch(
 	ctx context.Context,
 	credentials Credentials,
 	request models.AdvBookingSearchRequest,
-	requestLogger RequestLogger,
-	responseLogger ResponseLogger,
 ) (models.AdvBookingSearchResponse, error) {
 	if request.Version == "" {
 		request.Version = defaultRequestVersion[advBookingSearch]
@@ -318,8 +277,6 @@ func (c *goGlobalService) AdvBookingSearch(
 		c,
 		advBookingSearch,
 		request,
-		requestLogger,
-		responseLogger,
 	)
 }
 
@@ -327,8 +284,6 @@ func (c *goGlobalService) BookingCancel(
 	ctx context.Context,
 	credentials Credentials,
 	request models.BookingCancelRequest,
-	requestLogger RequestLogger,
-	responseLogger ResponseLogger,
 ) (models.BookingCancelResponse, error) {
 	return genericDoRequest[models.BookingCancelRequest, models.BookingCancelRoot, models.BookingCancelResponse](
 		ctx,
@@ -336,8 +291,6 @@ func (c *goGlobalService) BookingCancel(
 		c,
 		bookingCancel,
 		request,
-		requestLogger,
-		responseLogger,
 	)
 }
 
@@ -345,8 +298,6 @@ func (c *goGlobalService) VoucherDetails(
 	ctx context.Context,
 	credentials Credentials,
 	request models.VoucherDetailsRequest,
-	requestLogger RequestLogger,
-	responseLogger ResponseLogger,
 ) (models.VoucherDetailsResponse, error) {
 	return genericDoRequest[models.VoucherDetailsRequest, models.VoucherDetailsRoot, models.VoucherDetailsResponse](
 		ctx,
@@ -354,8 +305,6 @@ func (c *goGlobalService) VoucherDetails(
 		c,
 		voucherDetails,
 		request,
-		requestLogger,
-		responseLogger,
 	)
 }
 
@@ -363,8 +312,6 @@ func (c *goGlobalService) BookingInfoForAmendment(
 	ctx context.Context,
 	credentials Credentials,
 	request models.BookingInfoForAmendmentRequest,
-	requestLogger RequestLogger,
-	responseLogger ResponseLogger,
 ) (models.BookingInfoForAmendmentResponse, error) {
 	return genericDoRequest[models.BookingInfoForAmendmentRequest, models.BookingInfoForAmendmentRoot, models.BookingInfoForAmendmentResponse](
 		ctx,
@@ -372,8 +319,6 @@ func (c *goGlobalService) BookingInfoForAmendment(
 		c,
 		bookingInfoForAmendment,
 		request,
-		requestLogger,
-		responseLogger,
 	)
 }
 
@@ -381,8 +326,6 @@ func (c *goGlobalService) BookingAmendment(
 	ctx context.Context,
 	credentials Credentials,
 	request models.BookingAmendmentRequest,
-	requestLogger RequestLogger,
-	responseLogger ResponseLogger,
 ) error {
 	_, err := genericDoRequest[models.BookingAmendmentRequest, models.BookingAmendmentRoot, models.BookingAmendmentResponse](
 		ctx,
@@ -390,8 +333,6 @@ func (c *goGlobalService) BookingAmendment(
 		c,
 		bookingAmendment,
 		request,
-		requestLogger,
-		responseLogger,
 	)
 
 	return err
@@ -401,8 +342,6 @@ func (c *goGlobalService) HotelInfo(
 	ctx context.Context,
 	credentials Credentials,
 	request models.HotelInfoRequest,
-	requestLogger RequestLogger,
-	responseLogger ResponseLogger,
 ) (models.HotelInfoResponse, error) {
 	if request.Version == "" {
 		request.Version = defaultRequestVersion[hotelInfo]
@@ -413,8 +352,6 @@ func (c *goGlobalService) HotelInfo(
 		c,
 		hotelInfo,
 		request,
-		requestLogger,
-		responseLogger,
 	)
 }
 
@@ -422,8 +359,6 @@ func (c *goGlobalService) PriceBreakdown(
 	ctx context.Context,
 	credentials Credentials,
 	request models.PriceBreakdownRequest,
-	requestLogger RequestLogger,
-	responseLogger ResponseLogger,
 ) (models.PriceBreakdownResponse, error) {
 
 	return genericDoRequest[models.PriceBreakdownRequest, models.PriceBreakdownRoot, models.PriceBreakdownResponse](
@@ -432,8 +367,6 @@ func (c *goGlobalService) PriceBreakdown(
 		c,
 		priceBreakdown,
 		request,
-		requestLogger,
-		responseLogger,
 	)
 }
 
@@ -487,8 +420,6 @@ func (c *goGlobalService) doRequest(
 	credentials Credentials,
 	operation goGlobalRequest,
 	request any,
-	requestLogger RequestLogger,
-	responseLogger ResponseLogger,
 ) ([]byte, error) {
 	encoded, err := xml.Marshal(request)
 	if err != nil {
@@ -542,48 +473,11 @@ func (c *goGlobalService) doRequest(
 	req.Header.Add("Accept", "application/json")
 	req.Header.Add("Accept-Encoding", "gzip")
 
-	if requestLogger != nil {
-		err2 := requestLogger(req)
-		if err2 != nil {
-			log.Printf("save request error: %v \n", err2)
-		}
-	}
-
-	resp, err := c.client.Do(req)
+	body, _, err := c.client.Send(req)
 	if err != nil {
 		return nil, err
 	}
 
-	defer func() {
-		if err = resp.Body.Close(); err != nil {
-			log.Printf("make request: close connection: %s \n", err)
-		}
-	}()
-
-	var body []byte
-	if resp.Header.Get("Content-Encoding") == "gzip" {
-		reader, err := gzip.NewReader(resp.Body)
-		if err != nil {
-			return nil, err
-		}
-
-		body, err = io.ReadAll(reader)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		body, err = io.ReadAll(resp.Body)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if responseLogger != nil {
-		err2 := responseLogger(resp, body, false)
-		if err2 != nil {
-			log.Printf("save response error: %v \n", err2)
-		}
-	}
 	response := models.EnvelopeResponse{}
 
 	//assume that data in response contain &#x0000 characters only when it's typed by mistake
@@ -604,19 +498,10 @@ func genericDoRequest[REQ any, ROOT models.ResponseRoot[RES], RES any](
 	service *goGlobalService,
 	operation goGlobalRequest,
 	req REQ,
-	requestLogger RequestLogger,
-	responseLogger ResponseLogger,
 ) (RES, error) {
 	var response RES
 
-	var resp *http.Response
-	var respBody []byte
-
-	xmlResponse, err := service.doRequest(ctx, credentials, operation, req, requestLogger, func(r *http.Response, body []byte, isError bool) error {
-		resp = r
-		respBody = body
-		return nil
-	})
+	xmlResponse, err := service.doRequest(ctx, credentials, operation, req)
 	if err != nil {
 		return response, err
 	}
@@ -628,20 +513,7 @@ func genericDoRequest[REQ any, ROOT models.ResponseRoot[RES], RES any](
 	}
 
 	if err = root.CheckError(); err != nil {
-		if responseLogger != nil {
-			err2 := responseLogger(resp, respBody, true)
-			if err2 != nil {
-				return response, fmt.Errorf("cant't save responsee log with error %v, actual eror %v", err, err2)
-			}
-		}
 		return response, err
-	}
-
-	if responseLogger != nil {
-		err = responseLogger(resp, respBody, false)
-		if err != nil {
-			return response, fmt.Errorf("cant't save responsee log")
-		}
 	}
 
 	response = root.GetResponse()
